@@ -1,0 +1,109 @@
+; ==============================================================================
+; Term Macro Script: Telnet / TCPソケット 対話通信制御
+; 生成AI: Antigravity (Gemini 4 Carbon (Medium))
+; 対象システム: ネットワーク対話型機器（ルーター・スイッチ・Linuxサーバー・LAN対応電子計測器等）
+; ==============================================================================
+TITLE, "Telnet / TCPソケット 対話通信制御"
+
+; ------------------------------------------------------------------------------
+; コマンド定義: PORT_OPEN (通信モード設定・Telnet/TCP接続オープン)
+; ------------------------------------------------------------------------------
+COMMAND, "PORT_OPEN"
+,PARAM, HOST_IP, Text, "接続先ホスト/IPアドレス", "192.168.1.10"
+,PARAM, PORT_NO, Text, "接続先ポート番号", "23"
+,PARAM, CONN_TIMEOUT, Text, "接続タイムアウト(ms)", "5000"
+,PARAM, TX_DELIM, List, "送信改行コード", "TXCRLF", "TXCR", "NON"
+,PARAM, DATA_MODE, List, "受信データモード", "ASCII", "BIN"
+,PARAM, NVT_FILTER, List, "NVT制御フィルタ(IAC)", "ON", "OFF"
+,SEQUENCE, 10, Telnet_Mode, "$TX_DELIM$", "$DATA_MODE$", "$NVT_FILTER$"
+,SEQUENCE, 20, Telnet_Open, "$HOST_IP$", "$PORT_NO$", "$CONN_TIMEOUT$"
+,SEQUENCE, 30, Exit
+
+; ------------------------------------------------------------------------------
+; コマンド定義: LOGIN_AUTH (リモートホスト認証・シェルプロンプト確立)
+; ------------------------------------------------------------------------------
+COMMAND, "LOGIN_AUTH", ON
+,PARAM, AUTH_MODE, List, "認証モード", "USER_PASS", "PROMPT_ONLY"
+,PARAM, LOGIN_PROMPT, Text, "ログインプロンプト", "login:"
+,PARAM, USER_ID, Text, "ユーザー名", "admin"
+,PARAM, PASS_PROMPT, Text, "パスワードプロンプト", "Password:"
+,PARAM, PASSWORD, Text, "パスワード(実行時指定)", ""
+,PARAM, SHELL_PROMPT, Text, "シェルプロンプト", "#"
+,PARAM, TIMEOUT_MS, Text, "待機タイムアウト(ms)", "10000"
+,SEQUENCE, 10, Judge, EQU, "$AUTH_MODE$", "USER_PASS", #WAIT_SHELL#
+,SEQUENCE, 20, Telnet_WaitPrompt, "$LOGIN_PROMPT$", "$TIMEOUT_MS$", #AUTH_ERR#
+,SEQUENCE, 30, Telnet_Send, "$USER_ID$"
+,SEQUENCE, 40, Telnet_WaitPrompt, "$PASS_PROMPT$", "$TIMEOUT_MS$", #AUTH_ERR#
+,SEQUENCE, 50, Telnet_Send, "$PASSWORD$"
+,SEQUENCE, #WAIT_SHELL#, Telnet_WaitPrompt, "$SHELL_PROMPT$", "$TIMEOUT_MS$", #AUTH_ERR#
+,SEQUENCE, 70, Exit
+,SEQUENCE, #AUTH_ERR#, Exit
+
+; ------------------------------------------------------------------------------
+; コマンド定義: STATUS_READ (リモートコマンド実行・応答行データ抽出)
+; ------------------------------------------------------------------------------
+COMMAND, "STATUS_READ", "RESULT_DATA"
+,PARAM, QUERY_CMD, Text, "状態取得コマンド", "show version"
+,PARAM, SHELL_PROMPT, Text, "応答プロンプト", "#"
+,PARAM, TIMEOUT_MS, Text, "待機タイムアウト(ms)", "5000"
+,PARAM, ECHO_SKIP, List, "エコー行スキップ数", "1", "0", "2"
+,PARAM, TARGET_LINE, Text, "抽出対象行番号", "1"
+,PARAM, RESULT_DATA, Range, "読出データ結果", ""
+,SEQUENCE, 10, Time_Stamp, "OFF"
+,SEQUENCE, 20, Telnet_Send, "$QUERY_CMD$"
+,SEQUENCE, 30, Telnet_WaitPrompt, "$SHELL_PROMPT$", "$TIMEOUT_MS$", #RETRY_QUERY#
+,SEQUENCE, #PARSE_RES#, Judge, GT, "$ECHO_SKIP$", "0", #EXTRACT_RES#
+,SEQUENCE, 50, Skip_Line, "$ECHO_SKIP$"
+,SEQUENCE, #EXTRACT_RES#, Get_Line, "RESULT_DATA", "$TARGET_LINE$"
+,SEQUENCE, 70, Time_Stamp, "ON"
+,SEQUENCE, 80, Exit
+,SEQUENCE, #RETRY_QUERY#, Telnet_Send, "$QUERY_CMD$"
+,SEQUENCE, 100, Telnet_WaitPrompt, "$SHELL_PROMPT$", "$TIMEOUT_MS$", #QUERY_TIMEOUT#
+,SEQUENCE, 110, Jump, #PARSE_RES#
+,SEQUENCE, #QUERY_TIMEOUT#, Set_Data, "RESULT_DATA", "ERROR_TIMEOUT"
+,SEQUENCE, 130, Time_Stamp, "ON"
+,SEQUENCE, 140, Exit
+
+; ------------------------------------------------------------------------------
+; コマンド定義: CMD_EXEC (任意コマンド送信・全応答ログ取得)
+; ------------------------------------------------------------------------------
+COMMAND, "CMD_EXEC", "RESULT_DATA"
+,PARAM, SEND_CMD, Text, "送信コマンド文字列", "uname -a"
+,PARAM, LINE_END, List, "行末改行指定", "CRLF", "CR", "LF", "NONE"
+,PARAM, SHELL_PROMPT, Text, "応答プロンプト", "#"
+,PARAM, TIMEOUT_MS, Text, "待機タイムアウト(ms)", "5000"
+,PARAM, RESULT_DATA, Range, "応答ログ結果", ""
+,SEQUENCE, 10, Telnet_Send, "$SEND_CMD$", "$LINE_END$"
+,SEQUENCE, 20, Telnet_WaitPrompt, "$SHELL_PROMPT$", "$TIMEOUT_MS$", #EXEC_TIMEOUT#
+,SEQUENCE, 30, Set_Data, "RESULT_DATA"
+,SEQUENCE, 40, Exit
+,SEQUENCE, #EXEC_TIMEOUT#, Set_Data, "RESULT_DATA", "ERROR_TIMEOUT"
+,SEQUENCE, 60, Exit
+
+; ------------------------------------------------------------------------------
+; コマンド定義: SCRIPT_SEND (外部コンフィグ・スクリプト一括送信)
+; ------------------------------------------------------------------------------
+COMMAND, "SCRIPT_SEND"
+,PARAM, FILE_PATH, Text, "送信スクリプトパス", "./scripts/device_setup.txt"
+,PARAM, WAIT_OPTION, List, "行間待機モード", "WaitPrompt", "NP", "50", "100"
+,PARAM, CLEAR_ERR, List, "送信前エラークリア", "true", "false"
+,PARAM, SHELL_PROMPT, Text, "完了確認プロンプト", "#"
+,PARAM, TIMEOUT_MS, Text, "待機タイムアウト(ms)", "10000"
+,PARAM, ERR_STATUS, Work, "通信エラー状態", ""
+,SEQUENCE, 10, Telnet_SendFile, "$FILE_PATH$", "$WAIT_OPTION$", "$CLEAR_ERR$"
+,SEQUENCE, 20, Telnet_WaitPrompt, "$SHELL_PROMPT$", "$TIMEOUT_MS$", #SCRIPT_END#
+,SEQUENCE, 30, Set_Data, "ERR_STATUS", "COM_ERR_FLG"
+,SEQUENCE, 40, Judge, EQU, "$ERR_STATUS$", "CLR", #SCRIPT_END#
+,SEQUENCE, #SCRIPT_END#, Exit
+
+; ------------------------------------------------------------------------------
+; コマンド定義: PORT_CLOSE (ログアウト送出・Telnetソケット切断)
+; ------------------------------------------------------------------------------
+COMMAND, "PORT_CLOSE"
+,PARAM, SEND_LOGOUT, List, "切断前ログアウト送信", "OFF", "ON"
+,PARAM, LOGOUT_CMD, Text, "ログアウトコマンド", "exit"
+,SEQUENCE, 10, Judge, EQU, "$SEND_LOGOUT$", "ON", #DO_CLOSE#
+,SEQUENCE, 20, Telnet_Send, "$LOGOUT_CMD$"
+,SEQUENCE, #DO_CLOSE#, Telnet_Close
+,SEQUENCE, 40, Exit
+

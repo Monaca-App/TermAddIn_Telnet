@@ -1,7 +1,5 @@
 ﻿# コマンドリファレンス：Telnet_Mode
 
----
-
 ## 概要
 
 **Telnet_Mode** は、Telnet（および Raw TCP ソケット）通信における送信デリミタ（`TXCR` / `TXCRLF` / `NON`）、受信データモード（`ASCII` / `BIN`）、および Telnet NVT 制御コード（IAC: `0xFF`）のフィルタ・自動ネゴシエーション応答の有効／無効（`ON` / `OFF`）を設定する統合モード制御コマンドです。
@@ -15,7 +13,7 @@
 ### コマンド構文
 
 ```csv
-,SEQUENCE,Telnet_Mode, "[TxDelimiter]", "[DataMode]", "[NvtFilter: ON/OFF]"
+,SEQUENCE, [ステップキー], Telnet_Mode, "[TxDelimiter]", "[DataMode]", "[NvtFilter: ON/OFF]"
 ```
 
 ### パラメータ（引数）一覧
@@ -30,10 +28,12 @@
 
 ## 🔄 特殊置換規約・分岐規約の適用
 
-1. **部分更新（省略または空文字 `""` の維持仕様）**:
-   - 変更したい項目のみを指定し、他の引数を省略または `""` とすることで、既存のモード設定を維持したまま特定の属性だけを変更できます。
-2. **変数展開（`$` / `@` / `#`）**:
-   - 各引数には変数を指定可能です（例: `"$DELIM_MODE"`, `"$NVT_FLAG"`）。
+本コマンドの引数における特殊記法および解釈ルールです。
+* **動的置換（`$`）**: 引数内で `$PARAMキー$` のように記述すると、実行時に変数プール（PARAM）の値へ動的置換されます。（適用可能な引数: 全引数対応）
+* **ジャンプ先指定（`#`）**: 本コマンドはジャンプ制御を行わないため適用されません。（適用可能な引数: 非適用）
+* **共通コマンド指定（`@`）**: 本コマンドは外部マクロを呼び出さないため、共通コマンド呼び出し記法は適用されません。（適用可能な引数: 非適用）
+* **カンマのエスケープ**: 通信条件文字列（例: `"9600,E,7,1"`）や複数データのカンマ区切り値を単一引数として渡す場合は、必ず `"..."` と二重引用符で囲んで記述します。
+* **エイリアス（別名）**: `Telnet_Ip`, `Analysis_Telnet_Ip`
 
 ---
 
@@ -41,24 +41,26 @@
 
 ### スクリプト記述例
 
-```csv
-; 1. 標準Telnet接続向け設定（CRLF改行、ASCIIモード、NVT IACフィルタ有効）
-,SEQUENCE,Telnet_Mode, "TXCRLF", "ASCII", "ON"
-,SEQUENCE,Telnet_Open
-,SEQUENCE,Telnet_Close
+※COMMAND ブロック配下の子要素行（PARAM, SEQUENCE）は必ず行頭カンマから開始し、スペースインデントや行末コメント（`;`）は記述しないでください。
 
+```csv
+COMMAND, "SAMPLE_TELNET_MODE", ""
+; 1. 標準Telnet接続向け設定（CRLF改行、ASCIIモード、NVT IACフィルタ有効）
+,SEQUENCE, 010, Telnet_Mode, "TXCRLF", "ASCII", "ON"
+,SEQUENCE, 020, Telnet_Open
+,SEQUENCE, 030, Telnet_Close
 ; 2. Raw TCPソケット機器（バイナリプロトコル）向け設定（改行なし、BINモード、NVTフィルタ無効）
-,SEQUENCE,Telnet_Mode, "NON", "BIN", "OFF"
-,SEQUENCE,Telnet_Open
-,SEQUENCE,Telnet_Send, "02 01 FF 03", "HEX"
-,SEQUENCE,Telnet_Close
-,SEQUENCE,Exit
+,SEQUENCE, 040, Telnet_Mode, "NON", "BIN", "OFF"
+,SEQUENCE, 050, Telnet_Open
+,SEQUENCE, 060, Telnet_Send, "02 01 FF 03", "HEX"
+,SEQUENCE, 070, Telnet_Close
+,SEQUENCE, 080, Exit
 ```
 
 ### 実行時の挙動・変数変化
 
-1. 1 回目の `Telnet_Mode` では標準 Telnet クライアントとして動作し、サーバーからの `IAC DO/WILL` ネゴシエーションを自動処理してテキストのみを受信バッファへ格納します。
-2. 2 回目の `Telnet_Mode` では `NvtFilter` が `OFF` になるため、ペイロード内の `0xFF` バイトが Telnet 制御コードとして誤認・除去されることなく、そのまま Raw TCP ストリームとして送受信されます。
+* **実行前の状態**: Term 通信エンジンが初期化され、必要な通信パラメータおよび変数プール（`PARAM`）が準備されている状態。
+* **実行後の状態**: 1 回目の `Telnet_Mode` では標準 Telnet クライアントとして動作し、サーバーからの `IAC DO/WILL` ネゴシエーションを自動処理してテキストのみを受信バッファへ格納します。 2 回目の `Telnet_Mode` では `NvtFilter` が `OFF` になるため、ペイロード内の `0xFF` バイトが Telnet 制御コードとして誤認・除去されることなく、そのまま Raw TCP ストリームとして送受信されます。
 
 ---
 
@@ -83,6 +85,12 @@ sequenceDiagram
         Cmd->>Sock: SetNvtFilterEnabled(ON: IAC処理有効 / OFF: Raw TCP透過)
     end
     Cmd-->>Script: 正常終了 (Next Step)
+    alt パラメータおよびプロトコル検証が正常な場合
+        Cmd-->>Script: 正常完了 (IsCommandGo = true)
+    else 引数範囲外または通信状態異常の場合
+        Cmd->>Cmd: エラーログ出力 (_log.LogError)
+        Cmd-->>Script: 安全停止 (SetErrorAndHalt)
+    end
 ```
 
 ---
@@ -98,15 +106,17 @@ sequenceDiagram
 
 ## 🧪 ユニットテスト仕様
 
+本コマンドクラス（`Telnet_ModeCommand.cs`）に実装されている `RunUnitTest()` メソッドが検証するユニットテストの仕様です。
+
 ### テスト実行前提条件
-- **対象クラス**: `TermAnalysis.Telnet.Telnet_ModeCommand`（`Telnet_ModeCommand.cs`）
-- **モック環境**: `ITelnetClientAdapter` モックおよび `TermRingBufferManager` が注入されていること。
+
+* **実行トリガー**: `RunUnitTest()` メソッドの呼び出し
+* **有効化条件**: システム全体の最小ログレベル（`ErrorLogger.MinimumLevel`）が `LogLevel.Test` であること（それ以外の場合は無効化ガードにより早期リターン）
+* **検証結果出力**: `_log.LogTest` によるログ出力。検証失敗時は `_log.LogError`、予期せぬ例外発生時は `_log.LogCritical` で記録し、`finally` ブロックで `ApplyTelnetSetting` により `"TXDELIMITER"`=`"TXCR"`、`"DATAMODE"`=`"ASCII"`、`"NVTFILTER"`=`"ON"` へ初期状態を復元します。
 
 ### テストケース一覧
 
-| テストID | テスト観点 | 入力スクリプト | 期待される動作・検証項目 |
-| :--- | :--- | :--- | :--- |
-| `UT-TELNET-MODE-01` | 標準Telnet設定 | `,SEQUENCE,Telnet_Mode, "TXCRLF", "ASCII", "ON"` | デリミタ `CRLF`、データモード `ASCII`、NVT フィルタ `ON` が設定されること。 |
-| `UT-TELNET-MODE-02` | Raw TCPソケット設定 | `,SEQUENCE,Telnet_Mode, "NON", "BIN", "OFF"` | デリミタなし、データモード `BIN`、NVT フィルタ `OFF`（`0xFF` 透過）が設定されること。 |
-| `UT-TELNET-MODE-03` | 異常系（不正キーワード） | `,SEQUENCE,Telnet_Mode, "INVALID_DELIM"` | `ArgumentException` が送出され、エラーログが出力されること。 |
-
+| No | テストカテゴリ | テスト条件（入力値） | 期待される結果（出力値） | 検証の目的 / 観点 |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | 正常系 | 引数 `"TXCRLF"`, `"BIN"`, `"OFF"` の 3 引数を一括指定して実行 | `!param.HasError` かつ `TxDelimiter == TermTxDelimiterMode.TXCRLF`、`DataMode == TermDataMode.BIN`、`!NvtFilterEnabled` となる | 送信デリミタ・バイナリ受信モード・NVT フィルタ無効化（Raw TCP 透過）の一括設定検証 |
+| **2** | 異常系 | 引数 4 個以上の過剰指定（`ValidateParamRange(0, 3)` 違反）または設定適用中の例外発生 | 引数範囲外エラー出力による早期リターン、または `_log.LogCritical` 記録と `SetErrorAndHalt(-1, ex.Message)` による安全停止 | 引数個数境界ガードおよびモード更新例外時のフェイルセーフ検証 |

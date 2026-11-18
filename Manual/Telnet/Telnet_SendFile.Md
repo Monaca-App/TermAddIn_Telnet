@@ -1,7 +1,5 @@
 ﻿# コマンドリファレンス：Telnet_SendFile
 
----
-
 ## 概要
 
 **Telnet_SendFile** は、指定されたテキストファイルの内容を 1 行ずつ読み込み、接続中の Telnet（または Raw TCP ソケット）ストリームへ逐次送信するコマンドです。
@@ -16,24 +14,27 @@
 ### コマンド構文
 
 ```csv
-,SEQUENCE,Telnet_SendFile, "<FilePath>", "[WaitPrompt/DelayMs]"
+,SEQUENCE, [ステップキー], Telnet_SendFile, [FilePath], "[WaitPromptOrDelayMs: WaitPrompt]", "[ClearError: false]"
 ```
 
 ### パラメータ（引数）一覧
 
-| 引数位置 | パラメータ名 | 必須/任意 | 型・制約 | 説明 |
-| :---: | :--- | :---: | :--- | :--- |
-| 第1引数 | `FilePath` | **必須** | 文字列（ファイルパス） | 送信するテキストファイルのパス（相対パスまたは絶対パス）を指定します。 |
-| 第2引数 | `WaitPrompt/DelayMs` | 任意 | 数値文字列 または プロンプト文字列（既定値: `"0"`） | ・数値（例: `"50"`）を指定した場合：1行送信ごとに指定ミリ秒待機します。<br>・文字列（例: `"#"`）を指定した場合：1行送信ごとにそのプロンプトが受信されるまで待機します。 |
+| 引数位置 | 引数名 | 必須/任意 | 説明・制約 |
+| :--- | :--- | :---: | :--- |
+| 第 1 引数 | `FilePath` | **必須** | 送信するテキストファイルのパス（相対パスまたは絶対パス）。 |
+| 第 2 引数 | `WaitPromptOrDelayMs` | 任意 | 行間待機プロンプト文字列またはミリ秒ディレイ数値（省略時既定値: `"WaitPrompt"`）。 |
+| 第 3 引数 | `ClearError` | 任意 | 送信開始前に既存の通信エラー状態をクリアするかを示す真偽値（`"true"` / `"false"`、省略時既定値: `false`）。 |
 
 ---
 
 ## 🔄 特殊置換規約・分岐規約の適用
 
-1. **ファイルパスおよび待機条件の変数展開**:
-   - 第 1 引数・第 2 引数ともに `$` / `@` / `#` による変数展開が適用されます。
-2. **送信デリミタの自動適用**:
-   - ファイル内の各行に対して、`Telnet_Mode` で設定されている送信デリミタ（`TXCR` / `TXCRLF` / `NON`）が付与されて送信されます。
+本コマンドの引数における特殊記法および解釈ルールです。
+* **動的置換（`$`）**: 引数内で `$PARAMキー$` のように記述すると、実行時に変数プール（PARAM）の値へ動的置換されます。（適用可能な引数: 全引数対応）
+* **ジャンプ先指定（`#`）**: 本コマンドはジャンプ制御を行わないため適用されません。（適用可能な引数: 非適用）
+* **共通コマンド指定（`@`）**: 本コマンドは外部マクロを呼び出さないため、共通コマンド呼び出し記法は適用されません。（適用可能な引数: 非適用）
+* **カンマのエスケープ**: 通信条件文字列（例: `"9600,E,7,1"`）や複数データのカンマ区切り値を単一引数として渡す場合は、必ず `"..."` と二重引用符で囲んで記述します。
+* **エイリアス（別名）**: なし（標準コマンド名 `Telnet_SendFile` のみ。大文字・小文字は区別されません）
 
 ---
 
@@ -41,22 +42,23 @@
 
 ### スクリプト記述例
 
+※COMMAND ブロック配下の子要素行（PARAM, SEQUENCE）は必ず行頭カンマから開始し、スペースインデントや行末コメント（`;`）は記述しないでください。
+
 ```csv
-,PARAM,SCRIPT_PATH,.\scripts\switch_vlan_setup.txt
-
-,SEQUENCE,Telnet_Open
-,SEQUENCE,Telnet_WaitPrompt, "Switch#", "5000"
-
+COMMAND, "SAMPLE_TELNET_SENDFILE", ""
+,PARAM, "SCRIPT_PATH", Text, "SCRIPT_PATH", ".\scripts\switch_vlan_setup.txt"
+,SEQUENCE, 010, Telnet_Open
+,SEQUENCE, 020, Telnet_WaitPrompt, "Switch#", "5000"
 ; 1行送信ごとに "Switch#" プロンプトの返却を確認しながら設定ファイルを送信
-,SEQUENCE,Telnet_SendFile, "$SCRIPT_PATH", "Switch#"
-,SEQUENCE,Telnet_Close
-,SEQUENCE,Exit
+,SEQUENCE, 030, Telnet_SendFile, "$SCRIPT_PATH$", "Switch#"
+,SEQUENCE, 040, Telnet_Close
+,SEQUENCE, 050, Exit
 ```
 
 ### 実行時の挙動・変数変化
 
-1. `.\scripts\switch_vlan_setup.txt` の各行が順番に読み込まれます。
-2. 1 行送信するごとに受信リングバッファ（`TermRingBufferManager`）に `"Switch#"` が到着するのを待ち、確認後に次の行を送信します。
+* **実行前の状態**: Term 通信エンジンが初期化され、必要な通信パラメータおよび変数プール（`PARAM`）が準備されている状態。
+* **実行後の状態**: `.\scripts\switch_vlan_setup.txt` の各行が順番に読み込まれます。 1 行送信するごとに受信リングバッファ（`TermRingBufferManager`）に `"Switch#"` が到着するのを待ち、確認後に次の行を送信します。
 
 ---
 
@@ -98,15 +100,17 @@ sequenceDiagram
 
 ## 🧪 ユニットテスト仕様
 
+本コマンドクラス（`Telnet_SendFileCommand.cs`）に実装されている `RunUnitTest()` メソッドが検証するユニットテストの仕様です。
+
 ### テスト実行前提条件
-- **対象クラス**: `TermAnalysis.Telnet.Telnet_SendFileCommand`（`Telnet_SendFileCommand.cs`）
-- **モック環境**: テスト用一時ファイルおよび `ITelnetClientAdapter` モックが準備されていること。
+
+* **実行トリガー**: `RunUnitTest()` メソッドの呼び出し
+* **有効化条件**: システム全体の最小ログレベル（`ErrorLogger.MinimumLevel`）が `LogLevel.Test` であること（それ以外の場合は無効化ガードにより早期リターン）
+* **検証結果出力**: `_log.LogTest` によるログ出力。検証失敗時は `_log.LogError`、予期せぬ例外発生時は `_log.LogCritical` で記録し、`finally` ブロックでテスト用一時ファイル（`tempFile`）の削除、`TermRingBufferManager.Instance.CloseSession(TermTransportDomain.Telnet, null)`、および `SocketTransportCore.Shared.IsSimulationMode` の復元を実行します。
 
 ### テストケース一覧
 
-| テストID | テスト観点 | 入力スクリプト | 期待される動作・検証項目 |
-| :--- | :--- | :--- | :--- |
-| `UT-TELNET-SENDFILE-01` | 正常系（行間ディレイ送信） | `,SEQUENCE,Telnet_SendFile, "cmds.txt", "20"` | ファイル内の全行が 20ms 間隔で順番に送信されること。 |
-| `UT-TELNET-SENDFILE-02` | 正常系（プロンプト同期送信） | `,SEQUENCE,Telnet_SendFile, "cmds.txt", "#"` | 各行送信後に `"#"` の受信を確認してから次行が送信されること。 |
-| `UT-TELNET-SENDFILE-03` | 異常系（ファイル不在） | `,SEQUENCE,Telnet_SendFile, "missing.txt"` | `FileNotFoundException` が発生し、エラーログが出力されること。 |
-
+| No | テストカテゴリ | テスト条件（入力値） | 期待される結果（出力値） | 検証の目的 / 観点 |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | 正常系 | 一時ファイル `Telnet_SendFile_Test_<GUID>.txt`（内容 `"ls -la\r\npwd\r\n"`）を生成し、`IsSimulationMode = true` で Telnet セッション確立後、引数 `tempFile`, `"NP"`, `"true"` を指定して実行 | `!param.HasError` かつ `param.IsCommandGo == true` で全行送信が正常完了する | エラークリア指定およびプロンプト待機なし（`"NP"`）でのテキストファイル逐次送信の検証 |
+| **2** | 異常系 | 必須引数 `FilePath` 欠落・引数範囲外（`ValidateParamRange(1, 3)` 違反）、または存在しないファイルパスの指定 | `_log.LogError` 出力および `SetErrorAndHalt(-1, errMsg)` により未送信のまま安全に停止する | 必須ファイルパス検証およびファイル読込失敗時のクラッシュ防御検証 |
