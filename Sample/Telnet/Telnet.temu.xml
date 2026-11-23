@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<TermEmulatorProfile Version="1.0">
+  <Channel ChannelId="0" Enabled="true" Name="Sample Telnet Server (127.0.0.1:2323)" Mode="TcpServerDevice" ProtocolKey="TelnetServer" ShareGlobalMemory="true">
+    <EndpointA PortName="COM10" BaudRate="9600" DataBits="8" Parity="None" StopBits="One" Handshake="None" ListenAddress="127.0.0.1" Port="2323" PipeName="TermEmulatorPipe0" />
+    <EndpointB TargetHost="127.0.0.1" TargetPort="5021" TargetPortName="COM11" TargetBaudRate="9600" />
+    <Framing DelimiterMode="CrLf" IdleTimeoutMs="20" FixedFrameLength="8" CustomDelimiterHex="0D 0A" EncodingName="ASCII" DefaultTerminator="\r\n" DefaultChecksum="None" />
+    <ProtocolOptions>
+      <ProtocolOption Key="DelegateToGenericRules" Value="true" />
+      <ProtocolOption Key="EnableBuiltInCommands" Value="true" />
+      <ProtocolOption Key="ExpectedPass" Value="monaca" />
+      <ProtocolOption Key="ExpectedUser" Value="admin" />
+      <ProtocolOption Key="NewLine" Value="CRLF" />
+      <ProtocolOption Key="PassPrompt" Value="Password: " />
+      <ProtocolOption Key="RequireLogin" Value="true" />
+      <ProtocolOption Key="ServerEcho" Value="true" />
+      <ProtocolOption Key="ShellPrompt" Value="admin@emu-host:~# " />
+      <ProtocolOption Key="UseNvt" Value="true" />
+      <ProtocolOption Key="UserPrompt" Value="login: " />
+      <ProtocolOption Key="WelcomeBanner" Value="Monaca Virtual Device OS 1.0 (ttyS0)\r\n" />
+    </ProtocolOptions>
+    <Rules>
+      <Rule RuleId="r001" Enabled="true" Name="Show Version" Priority="10" PatternType="ContainsAscii" MatchPattern="show version" CaseSensitive="false" ReplyPayload="Monaca Virtual OS 1.0.0 (Build 2026)\r\nadmin@emu-host:~# " ReplyIsHex="false" ResponseDelayMs="5" AppendChecksum="None" AppendTerminator="true" MemoryWriteExpression="" />
+      <Rule RuleId="r002" Enabled="true" Name="Show Status" Priority="20" PatternType="ContainsAscii" MatchPattern="show status" CaseSensitive="false" ReplyPayload="STATUS: OK (Uptime 00:12:34)\r\nadmin@emu-host:~# " ReplyIsHex="false" ResponseDelayMs="5" AppendChecksum="None" AppendTerminator="true" MemoryWriteExpression="" />
+      <Rule RuleId="r003" Enabled="true" Name="Help Command" Priority="30" PatternType="ExactAscii" MatchPattern="help" CaseSensitive="false" ReplyPayload="Available: show version, show status, exit\r\nadmin@emu-host:~# " ReplyIsHex="false" ResponseDelayMs="5" AppendChecksum="None" AppendTerminator="true" MemoryWriteExpression="" />
+      <Rule RuleId="r004" Enabled="true" Name="Logout Command" Priority="40" PatternType="RegexAscii" MatchPattern="^(exit|logout)$" CaseSensitive="false" ReplyPayload="Bye.\r\n" ReplyIsHex="false" ResponseDelayMs="5" AppendChecksum="None" AppendTerminator="true" MemoryWriteExpression="" />
+    </Rules>
+    <FaultInjection Enabled="false" Direction="TxOnly" BaseLatencyMs="40" JitterMs="20" ChunkSplitEnabled="false" ChunkSizeBytes="8" InterChunkGapMs="15" DropTrigger="EveryNPackets" DropEveryN="20" DropPercent="5" CorruptTrigger="EveryNPackets" CorruptKind="InvertLastTwoBytes" CorruptEveryN="20" CorruptPercent="5" DisconnectEveryNPackets="0" DisconnectHoldMs="500" />
+    <PeriodicEmit PeriodicEnabled="false" IntervalMs="5000" PeriodicPayload="[SYSLOG $TIME$] KeepAlive OK" PeriodicIsHex="false" AppendChecksum="None" AppendTerminator="true" ScenarioEnabled="false" ScenarioLoop="true">
+      <Step StepIndex="1" TriggerPattern="show version" DelayMs="100" Payload="Monaca Virtual OS 1.0.0\r\nadmin@emu-host:~# " IsHex="false" Comment="バージョン照会シナリオ" />
+      <Step StepIndex="2" TriggerPattern="show status" DelayMs="150" Payload="LINK: UP, TEMP: 38.2C\r\nadmin@emu-host:~# " IsHex="false" Comment="ステータス照会シナリオ" />
+    </PeriodicEmit>
+  </Channel>
+</TermEmulatorProfile>

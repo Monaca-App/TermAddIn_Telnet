@@ -24,7 +24,7 @@ VBA マクロを一切記述することなく、 **標準の `.xlsx`（マク�
 > [!NOTE]
 > **利用前提とライセンス体系**  
 > 本エクステンションは [TermAddIn 本体](https://github.com/Monaca-App/TermAddIn) 上で動作します。  
-> TermAddIn ではプロトコル毎に個別ライセンスを設ける体系を採用しており、本機能のご利用には **`TermAddIn_Telnet` 個別ライセンス（料金未定・準備中）** が適用されます（なお、 **TermAddIn 本体** は現在 **近日公開** であり、全機能を無償でご試用いただける **評価期間は公開時に設定** いたします）。
+> TermAddIn ではプロトコル毎に個別ライセンスを設ける体系を採用しており、本機能のご利用には **`TermAddIn_Telnet` 個別ライセンス（一括 ¥32,000 / 月額 ¥3,000 / 週額 ¥1,000・税別）** が適用されます（ライセンス未配置・無効時は、Excel ブック再オープン時の既存ボタン無効化、および `Term.exe` 単体起動時の 3 分間期間限定版として動作します）。
 
 ---
 
@@ -37,9 +37,9 @@ VBA マクロを一切記述することなく、 **標準の `.xlsx`（マク�
 3. **プロンプト自動待機 ＆ タイムアウト分岐 (`Telnet_WaitPrompt`)**
    * 接続先ホストからのログインプロンプト（`"login:"`, `"Password:"`）やシェルプロンプト（`">"`, `"#"`, `"$"` 等）を非同期待機。指定タイムアウト（ミリ秒）到達時の自動ラベルジャンプ機能により、堅牢な対話シーケンスを実現。
 4. **外部設定スクリプトの一括送信 (`Telnet_SendFile`)**
-   * ネットワーク機器のコンフィグファイルや初期化スクリプトを読み込み、行単位でウェイトやプロンプト待機を挟みながら確実・迅速に一括送信。
-5. **Excel 32bit / 64bit 完全動作マトリクス**
-   * .NET Framework 標準のマネージドソケット基盤（`System.Net.Sockets`）を採用しており、外部の専用ネイティブ DLL に依存しないため、Excel 32bit 版および 64bit 版の双方で制限なく完全動作。
+   * ネットワーク機器のコンフィグファイルや初期化スクリプトを読み込み、行単位で指定ミリ秒ウェイトを挟みながら確実・迅速に一括送信。
+5. **Excel 32bit / 64bit 完全動作マトリクス ＆ 仮想サーバーテスト連携**
+   * .NET Framework 標準のマネージドソケット基盤（`System.Net.Sockets`）を採用しており、Excel 32bit 版および 64bit 版の双方で制限なく完全動作。また **[TermEmulator](https://github.com/Monaca-App/TermEmulator)** の Telnet 仮想サーバーや **[c2c](https://github.com/Monaca-App/c2c)** の TCP プロキシ中継と直結して実機なし検証も可能。
 
 ---
 
@@ -52,9 +52,9 @@ VBA マクロを一切記述することなく、 **標準の `.xlsx`（マク�
 | **`Telnet_Open`** | `Telnet_Open` | 設定された接続先ホスト（IP/ポート）へ TCP/Telnet 接続を開設 | [詳細説明](./Manual/Telnet/Telnet_Open.Md) |
 | **`Telnet_Close`** | `Telnet_Close` | オープン中の Telnet/TCP セッションを安全に切断・リソース解放 | [詳細説明](./Manual/Telnet/Telnet_Close.Md) |
 | **`Telnet_Mode`** | `Telnet_Mode, "[TxDelimiter]", "[DataMode]", "[NvtFilter]"` | 送信改行、データモード（ASCII/BIN）、NVT フィルタ（ON/OFF）の動的変更 | [詳細説明](./Manual/Telnet/Telnet_Mode.Md) |
-| **`Telnet_Send`** | `Telnet_Send, "<送信文字列/ファイルパス>", "[形式]", "[エラー受信用]"` | コマンド文字列または 16 進バイナリ電文の送信 | [詳細説明](./Manual/Telnet/Telnet_Send.Md) |
-| **`Telnet_SendFile`** | `Telnet_SendFile, "<ファイルパス>", "[待機条件]"` | 外部テキストファイル（コンフィグ等）を行単位で順次送信 | [詳細説明](./Manual/Telnet/Telnet_SendFile.Md) |
-| **`Telnet_WaitPrompt`** | `Telnet_WaitPrompt, "<プロンプト>", "[タイムアウトms]", "[タイムアウト時ジャンプ先]"` | 応答プロンプト文字列の受信待機および分岐処理 | [詳細説明](./Manual/Telnet/Telnet_WaitPrompt.Md) |
+| **`Telnet_Send`** | `Telnet_Send, "[送信文字列/ファイルパス]", "[モード]", "[改行/エラー格納先]"` | コマンド電文または外部ファイルの送信 | [詳細説明](./Manual/Telnet/Telnet_Send.Md) |
+| **`Telnet_SendFile`** | `Telnet_SendFile, "<ファイルパス>", "[行間ウェイトms]"` | 外部テキストファイル（コンフィグ等）を行単位で順次送信 | [詳細説明](./Manual/Telnet/Telnet_SendFile.Md) |
+| **`Telnet_WaitPrompt`** | `Telnet_WaitPrompt, "[プロンプト]", "[タイムアウトms]", "[タイムアウト時ジャンプ先]"` | 応答プロンプト文字列の受信待機および分岐処理 | [詳細説明](./Manual/Telnet/Telnet_WaitPrompt.Md) |
 
 ---
 
@@ -72,6 +72,35 @@ VBA マクロを一切記述することなく、 **標準の `.xlsx`（マク�
 
 ---
 
+## 🚀 インストール手順
+
+<a href="https://github.com/Monaca-App/TermAddIn_Telnet/raw/main/Setup/TermAddIn_Telnet_Setup.zip">
+  <img src="images/Monaca_app_get.jpg" width="140" alt="プログラム（入手）" />
+</a>
+
+> 上記の **「プログラム（入手）」アイコン** をクリックすると、セットアッププログラム一式（[`TermAddIn_Telnet_Setup.zip`](https://github.com/Monaca-App/TermAddIn_Telnet/raw/main/Setup/TermAddIn_Telnet_Setup.zip)）が直接ダウンロードされます。展開後、`TermAnalysis.Telnet\setup.exe`（または `TermAnalysis.Telnet.Setup.msi`）を実行してください。
+
+> [!IMPORTANT]
+> **導入前提**  
+> 本エクステンションを利用するには、事前に **[TermAddIn 本体](https://github.com/Monaca-App/TermAddIn)** （`Term.Setup` および `TermAddIn.Setup`）をインストールしておく必要があります。
+
+### 配布アーカイブ（本リポジトリ `Setup/` 配下）
+
+* **アーカイブ**: [`Setup/TermAddIn_Telnet_Setup.zip`](https://github.com/Monaca-App/TermAddIn_Telnet/raw/main/Setup/TermAddIn_Telnet_Setup.zip)（収録内容: `TermAnalysis.Telnet/setup.exe`, `TermAnalysis.Telnet/TermAnalysis.Telnet.Setup.msi`）
+
+### 導入ステップ
+
+1. **Microsoft Excel** および **Term** をすべて終了します。
+2. ダウンロードした **`TermAddIn_Telnet_Setup.zip`** を展開し、 **`TermAnalysis.Telnet/`** フォルダ内の **`setup.exe`** （または **`TermAnalysis.Telnet.Setup.msi`** ）を実行します。
+   * ※ 管理者権限（UAC 承認）が必要です。
+   * ※ 拡張 DLL は共通インストール先（`C:\Program Files (x86)\Monacaアプリ工房\Monaca Common\`）へ配置され、サンプル資材が `C:\Program Files (x86)\Monacaアプリ工房\Monaca Sample\Telnet\` へ導入されます。
+3. インストール完了後、Excel（または `Term.exe`）を起動し、メイン画面の **`[通信モード]`** メニューから **`TELNET`** が選択できることを確認します。
+
+### アンインストール手順
+* Windows の「設定」>「アプリ」>「インストールされているアプリ」（または「コントロールパネル」の「プログラムと機能」）から **`TermAnalysis.Telnet.Setup`** を選択してアンインストールしてください。
+
+---
+
 ## 🔰 シーケンス記述例・同梱サンプル資材（`Sample/Telnet/`）
 
 Excel シート上での典型的な Telnet ログイン・コマンド実行シーケンスの構成例です。
@@ -81,27 +110,27 @@ Excel シート上での典型的な Telnet ログイン・コマンド実行シ
 ,SEQUENCE, 010, Telnet_Mode, "TXCRLF", "ASCII", "ON"
 ,SEQUENCE, 020, Telnet_Open
 ; 2. ログインプロンプト "login:" を最大 10000ms 待機
-,SEQUENCE, 030, Telnet_WaitPrompt, "login:", 10000, "#ERROR"
+,SEQUENCE, 030, Telnet_WaitPrompt, "login:", 10000, #ERROR#
 ,SEQUENCE, 040, Telnet_Send, "admin"
 ; 3. パスワードプロンプト "Password:" を最大 5000ms 待機
-,SEQUENCE, 050, Telnet_WaitPrompt, "Password:", 5000, "#ERROR"
+,SEQUENCE, 050, Telnet_WaitPrompt, "Password:", 5000, #ERROR#
 ,SEQUENCE, 060, Telnet_Send, "secret123"
 ; 4. シェルプロンプト ">" を待機
-,SEQUENCE, 070, Telnet_WaitPrompt, ">", 5000, "#ERROR"
+,SEQUENCE, 070, Telnet_WaitPrompt, ">", 5000, #ERROR#
 ; 5. バージョン情報取得コマンド送信
 ,SEQUENCE, 080, Telnet_Send, "show version"
-,SEQUENCE, 090, Telnet_WaitPrompt, ">", 5000, "#ERROR"
+,SEQUENCE, 090, Telnet_WaitPrompt, ">", 5000, #ERROR#
 ; 6. セッションを切断して正常終了
 ,SEQUENCE, 100, Telnet_Close
 ,SEQUENCE, 110, Exit
 ; エラー処理ブロック
-#ERROR
-,SEQUENCE, 120, Msg_Box, "Telnet 通信でタイムアウトが発生しました。"
-,SEQUENCE, 130, Telnet_Close
+,SEQUENCE, #ERROR#, Msg_Box, "Telnet 通信でタイムアウトが発生しました。"
+,SEQUENCE, 120, Telnet_Close
+,SEQUENCE, 130, Exit
 ```
 
 ### 同梱サンプルマクロ・AI自動生成プロンプト集
-Telnet / Raw TCP ソケット通信の全 6 コマンド（接続モード・NVT フィルタ設定、ログイン認証、エコー除去データ抽出、任意コマンド送受信、外部スクリプト一括送信、切断）に対応した動作確認用マクロスクリプト（CSV）および AI 自動生成プロンプトが **`Sample/Telnet/`** に収録されています（Excel リボンの **「マニュアル配置 (`Make_Doc`)」** 実行時には `<設定場所>\Sample\TermAddIn\Telnet\` へ自動展開されます）。
+Telnet / Raw TCP ソケット通信の全 6 コマンド（接続モード・NVT フィルタ設定、ログイン認証、エコー除去データ抽出、任意コマンド送受信、外部スクリプト一括送信、切断）に対応した動作確認用マクロスクリプト（CSV）および AI 自動生成プロンプトが **`Sample/Telnet/`** に収録されています（インストール時には `C:\Program Files (x86)\Monacaアプリ工房\Monaca Sample\Telnet\` へ配置され、デスクトップの `Monaca\Sample` ショートカットから参照できます）。
 
 * **[`Sample/Telnet/Telnet.csv`](./Sample/Telnet/Telnet.csv)**: Telnet / TCP ソケット対話通信制御 汎用マクロスクリプトサンプル
 * **[`Sample/Telnet/Telnet_prompt.md`](./Sample/Telnet/Telnet_prompt.md)**: Telnet / TCP ソケット通信用マクロスクリプト AI 自動生成プロンプト
@@ -111,16 +140,15 @@ Telnet / Raw TCP ソケット通信の全 6 コマンド（接続モード・NVT
 ## 💳 ライセンス・購入プラン（TermAddIn_Telnet）
 
 > [!NOTE]
-> **料金プランおよび正式販売について**  
-> 本エクステンション（`TermAddIn_Telnet`）の販売料金およびライセンスプラン（買い切り・サブスクリプション）は **現在検討中（未定）** です。  
-> 正式な価格およびお申込み受付開始時期が決定次第、本ドキュメントおよび [Monaca アプリ工房ポータル](https://github.com/Monaca-App/store) にてご案内いたします。  
-> なお、[TermAddIn 本体](https://github.com/Monaca-App/TermAddIn) は現在 **近日公開** となっており、全機能を無償でご試用いただける **評価期間は公開時に設定** いたします。
+> **試用動作およびオンライン決済について**  
+> ライセンス未配置・無効時は、Excel ブック再オープン時の既存ボタン無効化（新規追加ボタンのみ試用可能）、および `Term.exe` 単体起動時の 3 分間期間限定版として動作します。  
+> 用途や利用期間に合わせて、一括購入（買い切り）またはサブスクリプション（月額・週額）からお選びいただけます。メールアドレスの誤入力によるライセンス不着を防ぐため、 **事前のメールアドレス確認** を行った上で、 **Stripe** による安全なオンライン決済へご案内いたします（表記価格はすべて税別です）。
 
-| プラン | 価格 | お支払い・お申込み |
+| プラン | 価格（税別） | お支払い・お申込み |
 | :--- | :---: | :---: |
-| **一括購入（買い切りライセンス）**<br>無期限で永続利用できるライセンスです。 | **未定** | 準備中 |
-| **月額サブスクリプション**<br>月単位で利用できる定期プランです。中長期のプロジェクトにおすすめです。 | **未定** | 準備中 |
-| **週額サブスクリプション**<br>週単位で手軽に利用できるプランです。短期評価や単発テストにおすすめです。 | **未定** | 準備中 |
+| **一括購入（買い切りライセンス）**<br>無期限で永続利用できるライセンスです。 | **¥32,000** | [👉 一括購入手続きへ](https://stripe-license-generator.y-nakai-5a3.workers.dev/?target=telnet) |
+| **月額サブスクリプション**<br>月単位で利用できる定期プランです。中長期のプロジェクトにおすすめです。 | **¥3,000** / 月 | [👉 月額プランに申し込む](https://stripe-license-generator.y-nakai-5a3.workers.dev/?target=telnet) |
+| **週額サブスクリプション**<br>週単位で手軽に利用できるプランです。短期評価や単発テストにおすすめです。 | **¥1,000** / 週 | [👉 週額プランに申し込む](https://stripe-license-generator.y-nakai-5a3.workers.dev/?target=telnet) |
 
 * ※ **ライセンスファイル名**: `TermAddIn_Telnet.License`
 * ※ **配置先**: `%USERPROFILE%\Desktop\Monaca\TermAddIn_Telnet.License`（設定ファイル `Setting.xml` と同階層）

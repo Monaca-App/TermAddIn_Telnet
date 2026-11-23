@@ -9,9 +9,9 @@ TITLE, "Telnet / TCPソケット 対話通信制御"
 ; コマンド定義: PORT_OPEN (通信モード設定・Telnet/TCP接続オープン)
 ; ------------------------------------------------------------------------------
 COMMAND, "PORT_OPEN"
-,PARAM, HOST_IP, Text, "接続先ホスト/IPアドレス", "192.168.1.10"
-,PARAM, PORT_NO, Text, "接続先ポート番号", "23"
-,PARAM, CONN_TIMEOUT, Text, "接続タイムアウト(ms)", "5000"
+,PARAM, HOST_IP, List, "接続先IP(空欄=プロパティ)", "", "127.0.0.1", "192.168.0.10", "192.168.1.10"
+,PARAM, PORT_NO, List, "ポート番号(空欄=プロパティ)", "", "23", "2323", "5025"
+,PARAM, CONN_TIMEOUT, List, "接続タイムアウトms(空欄=プロパティ)", "", "3000", "5000", "10000"
 ,PARAM, TX_DELIM, List, "送信改行コード", "TXCRLF", "TXCR", "NON"
 ,PARAM, DATA_MODE, List, "受信データモード", "ASCII", "BIN"
 ,PARAM, NVT_FILTER, List, "NVT制御フィルタ(IAC)", "ON", "OFF"
