@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="510" viewBox="0 0 880 510">
+  <defs>
+    <filter id="cardShadow" x="-2%" y="-2%" width="104%" height="106%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.14" />
+    </filter>
+    <style>
+      .ui { font-family: 'Yu Gothic UI', 'Meiryo UI', 'Segoe UI', sans-serif; }
+      .mono { font-family: 'Consolas', 'BIZ UDGothic', 'MS Gothic', monospace; }
+      .lbl { font-family: 'Yu Gothic UI', 'Meiryo UI', sans-serif; font-size: 11px; font-weight: 700; fill: #1E293B; }
+      .sub { font-family: 'Yu Gothic UI', 'Meiryo UI', sans-serif; font-size: 10.5px; fill: #475569; }
+      .inp { fill: #FFFFFF; stroke: #94A3B8; stroke-width: 1.2; rx: 3; }
+      .grp { fill: #FFFFFF; stroke: #CBD5E1; stroke-width: 1.1; rx: 5; }
+      .grp-hdr { font-family: 'Yu Gothic UI', 'Meiryo UI', sans-serif; font-size: 11.5px; font-weight: 700; fill: #0F766E; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="880" height="510" fill="#F8FAFC" rx="10" />
+  <text x="24" y="25" class="ui" font-size="13.5" font-weight="700" fill="#0F172A">図 4-4 : [Telnet] 疑似サーバー・対話シェル専用タブ画面（TermAnalysis.Telnet.dll 内蔵 : ucSlaveTelnet）</text>
+
+  <!-- ライセンスバッジ -->
+  <rect x="640" y="9" width="216" height="22" rx="11" fill="#CCFBF1" stroke="#0D9488" stroke-width="1" />
+  <text x="748" y="24" class="ui" font-size="10.2" font-weight="700" fill="#0F766E" text-anchor="middle">✓ TermAddIn_Telnet.License 有効</text>
+
+  <!-- タブストリップ (基本4タブ + 選択中の Telnet タブのみ表示) -->
+  <path d="M 28 66 L 28 44 Q 28 40 32 40 L 130 40 Q 134 40 134 44 L 134 66 Z" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1" />
+  <text x="81" y="57" class="ui" font-size="10.5" font-weight="600" fill="#475569" text-anchor="middle">接続・フレーミング</text>
+
+  <path d="M 138 66 L 138 44 Q 138 40 142 40 L 232 40 Q 236 40 236 44 L 236 66 Z" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1" />
+  <text x="187" y="57" class="ui" font-size="10.5" font-weight="600" fill="#475569" text-anchor="middle">自動応答ルール</text>
+
+  <path d="M 240 66 L 240 44 Q 240 40 244 40 L 302 40 Q 306 40 306 44 L 306 66 Z" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1" />
+  <text x="273" y="57" class="ui" font-size="10.2" font-weight="600" fill="#475569" text-anchor="middle">異常注入</text>
+
+  <path d="M 310 66 L 310 44 Q 310 40 314 40 L 366 40 Q 370 40 370 44 L 370 66 Z" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1" />
+  <text x="340" y="57" class="ui" font-size="10.2" font-weight="600" fill="#475569" text-anchor="middle">定周期</text>
+
+  <!-- アクティブタブ: [Telnet] -->
+  <path d="M 374 67 L 374 39 Q 374 35 378 35 L 468 35 Q 472 35 472 39 L 472 67 Z" fill="#FFFFFF" stroke="#0D9488" stroke-width="1.8" />
+  <text x="423" y="56" class="ui" font-size="11.5" font-weight="700" fill="#0F766E" text-anchor="middle">Telnet</text>
+  <text x="484" y="56" class="sub" font-size="9.8">※ ヘッダ「プロトコル: Telnet」選択時のみ表示</text>
+
+  <!-- ucSlaveTelnet 本体コンテナ -->
+  <g filter="url(#cardShadow)">
+    <rect x="24" y="66" width="832" height="420" rx="5" fill="#F8FAFC" stroke="#0D9488" stroke-width="1.5" />
+  </g>
+  <line x1="375" y1="66" x2="471" y2="66" stroke="#F8FAFC" stroke-width="2.5" />
+
+  <!-- 上部タイトルバー -->
+  <rect x="38" y="80" width="804" height="38" rx="5" fill="#F0FDFA" stroke="#5EEAD4" stroke-width="1.2" />
+  <text x="54" y="104" class="ui" font-size="11.5" font-weight="700" fill="#0F766E">Telnet / Raw Shell 疑似サーバー</text>
+
+  <!-- ① NVT オプション交渉・エコー・改行設定 -->
+  <rect x="38" y="128" width="804" height="96" class="grp" />
+  <text x="52" y="149" class="grp-hdr">① Telnet NVT オプション交渉 (IAC: 0xFF)・エコーバック・改行設定</text>
+
+  <text x="52" y="177" class="lbl">プロトコルモード:</text>
+  <circle cx="164" cy="173" r="6.5" fill="#FFFFFF" stroke="#0D9488" stroke-width="1.6" />
+  <circle cx="164" cy="173" r="3.5" fill="#0D9488" />
+  <text x="176" y="177" class="ui" font-size="11" font-weight="700" fill="#0F766E">Telnet NVT (IAC WILL/WONT/DO/DONT 自動応答)</text>
+
+  <circle cx="486" cy="173" r="6.5" fill="#FFFFFF" stroke="#64748B" stroke-width="1.4" />
+  <text x="498" y="177" class="ui" font-size="11" fill="#334155">Raw Socket Shell (IAC 制御なし)</text>
+
+  <rect x="52" y="196" width="14" height="14" rx="2" fill="#0D9488" />
+  <path d="M 55 203 L 58 206 L 63 199" stroke="#FFFFFF" stroke-width="1.8" fill="none" />
+  <text x="72" y="208" class="ui" font-size="10.8" fill="#1E293B">サーバーエコーバック (WILL ECHO : パスワード入力時はエコー自動抑止)</text>
+
+  <text x="524" y="208" class="lbl">送信改行コード:</text>
+  <rect x="622" y="191" width="118" height="24" class="inp" />
+  <text x="681" y="207" class="mono" font-size="11" fill="#0F172A" text-anchor="middle">CRLF (\r\n) ▼</text>
+
+  <!-- ② 接続バナー ＆ 疑似ログイン認証ステートマシン -->
+  <rect x="38" y="234" width="804" height="134" class="grp" />
+  <text x="52" y="255" class="grp-hdr">② 初期バナー・疑似ログイン認証ステートマシン・プロンプト設定</text>
+
+  <text x="52" y="283" class="lbl">初期バナー文字列:</text>
+  <rect x="164" y="266" width="660" height="24" class="inp" />
+  <text x="174" y="282" class="mono" font-size="11" fill="#0F172A">Monaca Virtual Device OS 1.0 (ttyS0)\r\n</text>
+
+  <rect x="52" y="302" width="14" height="14" rx="2" fill="#0D9488" />
+  <path d="M 55 309 L 58 312 L 63 305" stroke="#FFFFFF" stroke-width="1.8" fill="none" />
+  <text x="72" y="314" class="lbl">ログイン認証を要求:</text>
+
+  <text x="200" y="314" class="sub">User Prompt:</text>
+  <rect x="274" y="297" width="84" height="24" class="inp" />
+  <text x="282" y="313" class="mono" font-size="11" fill="#0F172A">login: </text>
+
+  <text x="370" y="314" class="sub">期待 User:</text>
+  <rect x="432" y="297" width="96" height="24" class="inp" />
+  <text x="442" y="313" class="mono" font-size="11" font-weight="700" fill="#0F766E">admin</text>
+
+  <text x="540" y="314" class="sub">Pass Prompt:</text>
+  <rect x="614" y="297" width="92" height="24" class="inp" />
+  <text x="622" y="313" class="mono" font-size="11" fill="#0F172A">Password: </text>
+
+  <text x="716" y="314" class="sub">Pass:</text>
+  <rect x="750" y="297" width="74" height="24" class="inp" />
+  <text x="758" y="313" class="mono" font-size="11" font-weight="700" fill="#0F766E">monaca</text>
+
+  <text x="52" y="348" class="lbl">シェルプロンプト:</text>
+  <rect x="164" y="331" width="236" height="24" class="inp" />
+  <text x="174" y="347" class="mono" font-size="11.5" font-weight="700" fill="#0F766E">admin@emu-host:~# </text>
+
+  <text x="424" y="348" class="lbl">認証失敗切断回数:</text>
+  <rect x="538" y="331" width="54" height="24" class="inp" />
+  <text x="565" y="347" class="mono" font-size="11.5" fill="#0F172A" text-anchor="middle">3</text>
+  <text x="600" y="348" class="sub">回失敗で Login incorrect 後に切断</text>
+
+  <!-- ③ 標準対話コマンド ＆ 汎用応答ルール連携 -->
+  <rect x="38" y="378" width="804" height="94" rx="5" fill="#F0FDFA" stroke="#0D9488" stroke-width="1.1" />
+  <text x="52" y="399" class="grp-hdr">③ 組み込みシェルコマンド応答 ＆ 「汎用応答ルール」タブ連携</text>
+
+  <rect x="52" y="413" width="14" height="14" rx="2" fill="#0D9488" />
+  <path d="M 55 420 L 58 423 L 63 416" stroke="#FFFFFF" stroke-width="1.8" fill="none" />
+  <text x="72" y="425" class="ui" font-size="10.8" fill="#1E293B">組み込み基本コマンドを有効化 (help / ver / date / status / exit・logout セッション切断)</text>
+
+  <rect x="52" y="439" width="14" height="14" rx="2" fill="#0D9488" />
+  <path d="M 55 446 L 58 449 L 63 442" stroke="#FFFFFF" stroke-width="1.8" fill="none" />
+  <text x="72" y="451" class="ui" font-size="10.8" font-weight="700" fill="#0F766E">ログイン完了後の受信コマンドを「汎用応答ルール」タブへ引き渡し、応答末尾にシェルプロンプトを自動再送出</text>
+
+  <text x="52" y="468" class="mono" font-size="9.6" fill="#64748B">実装配置: Apr/Term/ExtAnalysis/TermAnalysis.Telnet/Simulation/ucSlaveTelnet.cs (TelnetSlaveTab : IProtocolSlaveTab)</text>
+</svg>
+

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="470" viewBox="0 0 660 470">
+  <defs>
+    <filter id="winShadow" x="-3%" y="-3%" width="106%" height="108%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#0F172A" flood-opacity="0.16" />
+    </filter>
+    <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+    <style>
+      .ui { font-family: 'Yu Gothic UI', 'Meiryo UI', 'Segoe UI', sans-serif; }
+      .mono { font-family: 'Consolas', 'BIZ UDGothic', 'MS Gothic', monospace; }
+      .grp-box { fill: #F8FAFC; stroke: #CBD5E1; stroke-width: 1.2; rx: 4; }
+      .grp-lbl { font-family: 'Yu Gothic UI', 'Meiryo UI', sans-serif; font-size: 11.5px; font-weight: 700; fill: #1E293B; }
+      .input-box { fill: #FFFFFF; stroke: #94A3B8; stroke-width: 1; rx: 3; }
+      .input-hi { fill: #EFF6FF; stroke: #2563EB; stroke-width: 1.3; rx: 3; }
+      .btn-box { fill: #FFFFFF; stroke: #94A3B8; stroke-width: 1; rx: 4; }
+      .btn-pri { fill: #2563EB; stroke: #1D4ED8; stroke-width: 1; rx: 4; }
+      .callout-box { fill: #FFFBEB; stroke: #F59E0B; stroke-width: 1.3; rx: 6; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="660" height="470" fill="#F8FAFC" rx="10" />
+
+  <g transform="translate(26, 20)" filter="url(#winShadow)">
+    <rect x="0" y="0" width="608" height="378" rx="6" fill="#F3F4F6" stroke="#94A3B8" stroke-width="1.4" />
+    <path d="M 0 6 Q 0 0 6 0 L 602 0 Q 608 0 608 6 L 608 30 L 0 30 Z" fill="url(#titleGrad)" />
+    <text x="14" y="20" class="ui" font-size="12.5" font-weight="700" fill="#FFFFFF">通信ポートのプロパティ — [TELNET] タブ</text>
+    <line x1="584" y1="10" x2="594" y2="20" stroke="#FFFFFF" stroke-width="1.6" />
+    <line x1="594" y1="10" x2="584" y2="20" stroke="#FFFFFF" stroke-width="1.6" />
+
+    <!-- タブヘッダ -->
+    <path d="M 14 62 L 14 42 Q 14 38 18 38 L 108 38 Q 112 38 112 42 L 112 62 Z" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="1" />
+    <text x="63" y="53" class="ui" font-size="11.5" fill="#475569" text-anchor="middle">コマンド集</text>
+    <path d="M 114 62 L 114 40 Q 114 36 118 36 L 210 36 Q 214 36 214 40 L 214 62 Z" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.2" />
+    <text x="164" y="53" class="ui" font-size="11.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">TELNET</text>
+
+    <!-- タブ本体 -->
+    <rect x="14" y="61" width="580" height="268" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.2" />
+    <line x1="115" y1="61" x2="213" y2="61" stroke="#FFFFFF" stroke-width="2" />
+
+    <!-- GroupBox 1: TELNET 接続設定 -->
+    <rect x="28" y="78" width="552" height="86" class="grp-box" />
+    <rect x="38" y="70" width="116" height="16" fill="#FFFFFF" />
+    <text x="42" y="82" class="grp-lbl">TELNET 接続設定</text>
+
+    <text x="44" y="109" class="ui" font-size="11.5" fill="#334155">ホスト / IPアドレス:</text>
+    <rect x="174" y="92" width="230" height="26" class="input-hi" />
+    <text x="184" y="109" class="mono" font-size="12" font-weight="700" fill="#1E3A8A">192.168.0.1</text>
+    <text x="414" y="109" class="ui" font-size="10.5" fill="#64748B">(ローカル: 127.0.0.1)</text>
+
+    <text x="44" y="145" class="ui" font-size="11.5" fill="#334155">ポート番号:</text>
+    <rect x="174" y="128" width="104" height="26" class="input-box" />
+    <text x="186" y="145" class="mono" font-size="12" fill="#0F172A">23</text>
+    <rect x="288" y="128" width="96" height="26" class="btn-box" />
+    <text x="336" y="145" class="ui" font-size="11" font-weight="600" fill="#1E293B" text-anchor="middle">標準 (23)</text>
+
+    <!-- GroupBox 2: 通信パラメータ設定 -->
+    <rect x="28" y="178" width="552" height="82" class="grp-box" />
+    <rect x="38" y="170" width="124" height="16" fill="#FFFFFF" />
+    <text x="42" y="182" class="grp-lbl">通信パラメータ設定</text>
+
+    <text x="44" y="209" class="ui" font-size="11.5" fill="#334155">接続タイムアウト (秒):</text>
+    <rect x="174" y="192" width="84" height="26" class="input-box" />
+    <text x="186" y="209" class="mono" font-size="12" fill="#0F172A">5</text>
+
+    <text x="292" y="209" class="ui" font-size="11.5" fill="#334155">送信改行コード:</text>
+    <rect x="396" y="192" width="110" height="26" class="input-box" />
+    <text x="408" y="209" class="mono" font-size="12" fill="#0F172A">CRLF</text>
+    <polygon points="492,202 500,202 496,208" fill="#475569" />
+
+    <rect x="44" y="232" width="14" height="14" rx="2" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.4" />
+    <text x="66" y="243" class="ui" font-size="11.5" fill="#1E293B">ローカルエコー有効</text>
+
+    <!-- GroupBox 3: 設定概要 -->
+    <rect x="28" y="272" width="552" height="44" class="grp-box" />
+    <rect x="38" y="264" width="60" height="16" fill="#FFFFFF" />
+    <text x="42" y="276" class="grp-lbl">設定概要</text>
+    <text x="44" y="301" class="ui" font-size="11" fill="#475569">現在の設定:</text>
+    <text x="120" y="301" class="mono" font-size="12" font-weight="700" fill="#1E3A8A">192.168.0.1:23  [Timeout: 5s, CRLF]</text>
+
+    <!-- OK / キャンセル -->
+    <rect x="200" y="338" width="96" height="30" class="btn-pri" />
+    <text x="248" y="357" class="ui" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">OK</text>
+    <rect x="312" y="338" width="96" height="30" class="btn-box" />
+    <text x="360" y="357" class="ui" font-size="12" font-weight="600" fill="#1E293B" text-anchor="middle">キャンセル</text>
+  </g>
+
+  <rect x="26" y="410" width="608" height="44" class="callout-box" />
+  <text x="42" y="429" class="ui" font-size="11" font-weight="700" fill="#92400E">メイン画面の［通信モード(M)］で「TELNET」選択時に自動表示</text>
+  <text x="42" y="446" class="ui" font-size="10.5" fill="#451A03">・TermEmulator の仮想 Telnet / SCPI サーバー接続時はホストへ 127.0.0.1、相手ポート番号を指定します。</text>
+</svg>
